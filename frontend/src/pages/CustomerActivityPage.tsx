@@ -1,0 +1,13 @@
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { CalendarDays, CreditCard, ShoppingBag } from 'lucide-react';
+import { getAllOrders } from '../services/orderService';
+import reservationService from '../services/reservationService';
+import paymentService from '../services/paymentService';
+
+const money=(v:number)=>new Intl.NumberFormat('en-BD',{style:'currency',currency:'BDT'}).format(v||0);
+export default function CustomerActivityPage(){
+ const orders=useQuery({queryKey:['orders'],queryFn:getAllOrders}); const reservations=useQuery({queryKey:['reservations','mine'],queryFn:reservationService.getMine}); const payments=useQuery({queryKey:['payments','mine'],queryFn:paymentService.getMine});
+ const activities=useMemo(()=>[...(orders.data??[]).map(o=>({id:`o-${o.id}`,date:o.orderDate,type:'Order',title:o.orderNumber||`Order #${o.id}`,detail:`${o.orderType} · ${o.status}`,amount:money(o.totalAmount),icon:<ShoppingBag size={17}/> })),...(reservations.data??[]).map(r=>({id:`r-${r.id}`,date:r.createdAt,type:'Reservation',title:`Table ${r.restaurantTable.tableNumber}`,detail:`${new Date(r.reservationDateTime).toLocaleString('en-BD')} · ${r.status}`,amount:`${r.guestCount} guest(s)`,icon:<CalendarDays size={17}/> })),...(payments.data??[]).map(p=>({id:`p-${p.id}`,date:p.createdAt,type:'Payment',title:p.order?.orderNumber||`Order #${p.order?.id}`,detail:`${p.paymentMethod} · ${p.paymentStatus}`,amount:money(p.amount),icon:<CreditCard size={17}/> }))].sort((a,b)=>new Date(b.date).getTime()-new Date(a.date).getTime()),[orders.data,reservations.data,payments.data]);
+ return <div className="mx-auto max-w-6xl space-y-6"><div><p className="text-sm font-semibold text-emerald-700">MY ACTIVITY</p><h1 className="mt-1 text-3xl font-bold text-slate-900">Activity History</h1><p className="mt-2 text-slate-500">Orders, table reservations and payment proofs in one place.</p></div><section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="space-y-3">{activities.length===0?<p className="py-10 text-center text-slate-500">No activity yet.</p>:activities.map(a=><div key={a.id} className="flex items-center gap-3 rounded-xl border border-slate-100 p-4"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">{a.icon}</div><div className="min-w-0 flex-1"><p className="font-semibold text-slate-900">{a.title}</p><p className="text-sm text-slate-500">{a.type} · {a.detail}</p><p className="text-xs text-slate-400">{new Date(a.date).toLocaleString('en-BD')}</p></div><p className="shrink-0 font-semibold text-slate-800">{a.amount}</p></div>)}</div></section></div>;
+}

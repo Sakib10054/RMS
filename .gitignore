@@ -1,0 +1,36 @@
+﻿# Java / Maven
+**/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Frontend
+**/node_modules/
+**/dist/
+**/.npm/
+**/coverage/
+
+# IDE
+.idea/
+**/.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# Secrets
+.env
+.env.*
+!.env.example
+**/application-local.properties
+**/application-local.yml
+
+# Logs
+*.log
+hs_err_pid*.log
+
+# Uploaded files
+uploads/
+**/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
